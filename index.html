@@ -1,38 +1,108 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>日記</title>
   <link rel="stylesheet" href="style.css">
-
 </head>
 <body>
   <h1>日記</h1>
-  <p>今日のことを書く
+  <p>今日のことを書く</p>
+
+  <hr>
+
+  <h2>日記を書く</h2>
+  <form id="diary-form">
+    <label for="diary-date">日付</label>
+    <input type="date" id="diary-date" required>
+
+    <label for="diary-title">タイトル</label>
+    <input type="text" id="diary-title" placeholder="今日のタイトル" required>
+
+    <label for="diary-content">本文</label>
+    <textarea id="diary-content" rows="6"
+      placeholder="今日あったことを書く..." required></textarea>
+
+    <button type="submit">保存する</button>
+  </form>
 
   <hr>
 
   <h2>最新の日記</h2>
-   <ul id="diary-list"></ul>
+  <ul id="diary-list"></ul>
 
   <script>
-    // ここに記事ファイル名を追加するだけでOK
-    const diaryFiles = [
-      "2026-10-10.html",
-      "2026-10-11.html",
-      "2026-10-12.html"
-    ];
-
+    const form = document.getElementById("diary-form");
     const list = document.getElementById("diary-list");
 
-    diaryFiles.forEach(file => {
-      const li = document.createElement("li");
-      const a = document.createElement("a");
-      a.href = file;
-      a.textContent = file.replace(".html", "");
-      li.appendChild(a);
-      list.appendChild(li);
+    let diaries = JSON.parse(
+      localStorage.getItem("diaries") || "[]"
+    );
+
+    function renderDiaries() {
+      list.replaceChildren();
+
+      diaries.sort((a, b) => b.date.localeCompare(a.date));
+
+      diaries.forEach((diary, index) => {
+        const li = document.createElement("li");
+        const title = document.createElement("h3");
+        const date = document.createElement("p");
+        const content = document.createElement("p");
+        const edit = document.createElement("button");
+        const remove = document.createElement("button");
+
+        title.textContent = diary.title;
+        date.textContent = diary.date;
+        content.textContent = diary.content;
+        edit.textContent = "編集";
+        remove.textContent = "削除";
+
+        edit.addEventListener("click", () => {
+          document.getElementById("diary-date").value = diary.date;
+          document.getElementById("diary-title").value = diary.title;
+          document.getElementById("diary-content").value = diary.content;
+
+          diaries.splice(index, 1);
+          saveDiaries();
+        });
+
+        remove.addEventListener("click", () => {
+          if (confirm("この日記を削除しますか？")) {
+            diaries.splice(index, 1);
+            saveDiaries();
+          }
+        });
+
+        li.append(title, date, content, edit, remove);
+        list.appendChild(li);
+      });
+    }
+
+    function saveDiaries() {
+      localStorage.setItem("diaries", JSON.stringify(diaries));
+      renderDiaries();
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      diaries.push({
+        date: document.getElementById("diary-date").value,
+        title: document.getElementById("diary-title").value,
+        content: document.getElementById("diary-content").value
+      });
+
+      saveDiaries();
+      form.reset();
     });
+
+    document.getElementById("diary-date").value =
+      new Date().toLocaleDateString("sv-SE");
+
+    renderDiaries();
   </script>
 </body>
 </html>
