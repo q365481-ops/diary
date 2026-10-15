@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>カスになりかけの日記_善良でありたい</title>
+  <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+  <h1>日記</h1>
+  <p>今日のことを書く
+
+  <hr>
+
+  <h2>最新の日記</h2>
+   <ul id="diary-list"></ul>
+
+  <script>
+    // ここに記事ファイル名を追加するだけでOK
+    const diaryFiles = [
+      "2026-10-10.html",
+      "2026-10-11.html",
+      "2026-10-12.html"
+    ];
+
+    const list = document.getElementById("diary-list");
+
+    diaryFiles.forEach(file => {
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.href = file;
+      a.textContent = file.replace(".html", "");
+      li.appendChild(a);
+      list.appendChild(li);
+    });
+  </script>
+</body>
+</html>
