@@ -1,0 +1,37 @@
+
+name: Generate diary list
+
+on:
+  push:
+    paths:
+      - "*.html"
+      - "generate_diary.py"
+      - ".github/workflows/generate-diary.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Generate diary list
+        run: python generate_diary.py
+
+      - name: Commit diary list
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add diary-list.json
+          git diff --cached --quiet || git commit -m "Update diary list"
+          git push
