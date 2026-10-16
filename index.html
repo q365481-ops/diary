@@ -3,64 +3,108 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>日記</title>
+  <meta name="description" content="日々の記録をまとめた日記サイト">
+
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    body {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 30px 20px;
+      font-family: sans-serif;
+      line-height: 1.8;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+    }
+
+    .intro {
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    #diary-list {
+      padding-left: 24px;
+    }
+
+    #diary-list li {
+      margin: 10px 0;
+    }
+
+    #diary-list a {
+      color: #356b8c;
+      text-decoration: none;
+    }
+
+    #diary-list a:hover {
+      text-decoration: underline;
+    }
+
+    #status {
+      color: #666;
+      font-size: 0.9em;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>日記</h1>
-  <p>今日のことを書く</p>
+  <header>
+    <h1>日記</h1>
+    <p class="intro">日々の記録を残す場所。</p>
+  </header>
 
   <hr>
 
-  <h2>日記を書く</h2>
-  <form id="diary-form">
-    <label for="diary-date">日付</label>
-    <input type="date" id="diary-date" required>
-
-    <label for="diary-title">タイトル</label>
-    <input type="text" id="diary-title" placeholder="今日のタイトル" required>
-
-    <label for="diary-content">本文</label>
-    <textarea id="diary-content" rows="6"
-      placeholder="今日あったことを書く..." required></textarea>
-
-    <button type="submit">保存する</button>
-  </form>
-
-  <hr>
-
-  <h2>最新の日記</h2>
-  <ul id="diary-list"></ul>
+  <main>
+    <h2>日記一覧</h2>
+    <p id="status">日記を読み込んでいます……</p>
+    <ul id="diary-list"></ul>
+  </main>
 
   <script>
-    
-<script>
-  const list = document.getElementById("diary-list");
+    const list = document.getElementById("diary-list");
+    const status = document.getElementById("status");
 
-  fetch("./diary-list.json")
-    .then(response => {
-      if (!response.ok) {
-        throw new Error("日記一覧を読み込めませんでした");
-      }
-      return response.json();
-    })
-    .then(diaryFiles => {
-      diaryFiles.forEach(file => {
-        const li = document.createElement("li");
-        const a = document.createElement("a");
+    fetch("./diary-list.json")
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("一覧ファイルが見つかりません");
+        }
 
-        a.href = file;
-        a.textContent = file.replace(".html", "");
+        return response.json();
+      })
+      .then(diaryFiles => {
+        // 念のため、新しい日付が先になるように並べる
+        diaryFiles.sort((a, b) => b.localeCompare(a));
 
-        li.appendChild(a);
-        list.appendChild(li);
+        if (diaryFiles.length === 0) {
+          status.textContent = "まだ日記はありません。";
+          return;
+        }
+
+        diaryFiles.forEach(file => {
+          const li = document.createElement("li");
+          const a = document.createElement("a");
+
+          a.href = "./" + file;
+          a.textContent = file.replace(/\.html$/, "");
+
+          li.appendChild(a);
+          list.appendChild(li);
+        });
+
+        status.textContent = `${diaryFiles.length}件の日記`;
+      })
+      .catch(error => {
+        console.error(error);
+        status.textContent =
+          "日記一覧を読み込めませんでした。設定を確認してください。";
       });
-    })
-    .catch(error => {
-      list.textContent = "日記一覧を読み込めませんでした。";
-      console.error(error);
-    });
-</script>
+  </script>
 </body>
 </html>
